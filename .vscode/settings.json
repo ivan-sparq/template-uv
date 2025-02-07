@@ -12,12 +12,12 @@
     },
     "notebook.formatOnSave.enabled": true,
     "notebook.codeActionsOnSave": {
-        // "notebook.source.fixAll": "explicit",
-        // "notebook.source.organizeImports": "explicit"
+        "notebook.source.fixAll": "explicit"
     },
     "notebook.output.wordWrap": true,
     "notebook.output.textLineLimit": 200,
     "jupyter.debugJustMyCode": false,
+    "pythonTestExplorer.testFramework": "pytest",
     "python.testing.pytestEnabled": true,
     "python.testing.pytestArgs": [
         "tests"
