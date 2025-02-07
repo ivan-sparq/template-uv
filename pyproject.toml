@@ -1,0 +1,44 @@
+[project]
+name = "app"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [{ name = "Authi", email = "auther@authi.com" }]
+requires-python = ">=3.10"
+dependencies = []
+
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "ipykernel>=6.29.5",
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.6.3",
+    "mkdocstrings[python]>=0.28.0",
+    "mypy>=1.15.0",
+    "pre-commit>=4.1.0",
+    "pytest>=8.3.4",
+    "pytest-cov>=6.0.0",
+    "ruff>=0.9.5",
+    "tbump>=6.11.0",
+]
+
+
+[tool.pytest.ini_options]
+pythonpath = "src/app"
+# produce a code coverage report in xml, html and terminal
+# forces pytest to re-create the test database
+# NOTE: you can not run pycharm debugger with codecov. Comment out this line to debug
+addopts = '--cov=vrop --cov-report xml --cov-report html:coverage_html --cov-report term '
+markers = [
+    "unit: single funciton, no api calls",
+    "integration: test more than 1 function",
+    "system: not implemented",
+    "slow: slow running test that for some reason hang when running in parallel",
+]
+log_cli = 1
+log_cli_level = "DEBUG"
+#console_output_style = "classic"
