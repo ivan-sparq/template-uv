@@ -1,0 +1,10 @@
+site_name: App Docs
+nav:
+  - Home: index.md
+  - How-to: how-to/index.md
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: ["src/app"]

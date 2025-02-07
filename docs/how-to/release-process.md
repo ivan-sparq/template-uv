@@ -1,6 +1,5 @@
 # How to make a release
 
-
 1. create a new release branch `git checkout -b release/X.Y.Z`
 1. bump the package version `tbump X.Y.Z`
 1. commit the changes `git commit -m "bump version to X.Y.Z"`
