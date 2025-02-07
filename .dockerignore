@@ -1,0 +1,6 @@
+.pre-commit-config.yaml
+.gitignore
+.github
+# github
+# Ignore generated credentials from google-github-actions/auth
+gha-creds-*.json

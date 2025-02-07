@@ -1,0 +1,8 @@
+version: 2
+updates:
+  - package-ecosystem: pip
+    target-branch: "develop"
+    directory: "src"
+    schedule:
+      interval: "weekly"
+    rebase-strategy: "disabled"
