@@ -97,3 +97,28 @@ jobs:
             echo "Pushing to target branch: $TARGET_BRANCH"
             git push origin HEAD:$TARGET_BRANCH
           fi
+
+      - name: Create Git tag and GitHub release
+        if: steps.check-bump.outputs.skip_bump != 'true'
+        run: |
+          # Read the new version from VERSION file
+          NEW_VERSION=$(cat VERSION)
+          echo "Creating tag and release for version: $NEW_VERSION"
+
+          # Create and push the Git tag
+          git tag -a "v$NEW_VERSION" -m "Release v$NEW_VERSION"
+          git push origin "v$NEW_VERSION"
+
+          # Create GitHub release as pre-release
+          gh release create "v$NEW_VERSION" \
+            --title "Release v$NEW_VERSION" \
+            --notes "Pre-release for version $NEW_VERSION
+
+          This is an automated pre-release created after merging PR #${{ github.event.pull_request.number }}.
+
+          Changes:
+          - ${{ github.event.pull_request.title }}" \
+            --prerelease \
+            --target "${{ github.event.pull_request.base.ref }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
