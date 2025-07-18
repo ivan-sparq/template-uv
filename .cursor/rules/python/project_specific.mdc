@@ -3,6 +3,6 @@ alwaysApply: false
 ---
 - Code goes in src/app/.
 - Tests in tests/app/
-- Update VERSION and __init__.py for versioning with tbump.
+- Update VERSION and __init__.py for versioning with bump-my-version.
 - Follow pre-commit hooks including ruff.
 - Document using MkDocs in docs/.

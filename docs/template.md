@@ -2,7 +2,7 @@
 
 - [uv](https://docs.astral.sh/uv/)
 - [hatch](https://hatch.pypa.io/latest/)
-- [tbump](https://github.com/your-tools/tbump)
+- [bump-my-version](https://github.com/callowayproject/bump-my-version)
 - [ruff](https://github.com/astral-sh/ruff)
 - [pre-commit](https://pre-commit.com/)
 

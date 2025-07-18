@@ -4,7 +4,7 @@ Features:
 
 - [uv](https://docs.astral.sh/uv/) for dependency management
 - [hatch](https://hatch.pypa.io/latest/) for building and publishing
-- [tbump](https://github.com/your-tools/tbump) for version bumping
+- [bump-my-version](https://github.com/callowayproject/bump-my-version) for version bumping
 - [ruff](https://github.com/astral-sh/ruff) for linting
 - [pre-commit](https://pre-commit.com/) for pre-commit hooks
 - [GitHub Actions](https://github.com/features/actions) for CI/CD
@@ -20,7 +20,7 @@ Features:
 1. Update the python version in `.python-version` to match your needs
 1. Run `uv sync` to install the dependencies
 1. Update the .github/CODEOWNERS file with your github username
-1. update your package version with `tbump`. See `docs/how-to/release-process.md`
+1. update your package version with `bump-my-version`. See `docs/how-to/release-process.md`
 1. Delete this section of the README.md file and replace it with your own content
 
 ---
