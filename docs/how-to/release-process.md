@@ -7,3 +7,25 @@
 1. create a pull request to merge the changes into the main branch `gh pr create --base main`
 1. merge the pull request `gh pr merge `
 1. create a new release on GitHub `gh release create X.Y.Z`
+
+
+# Automatic version bump
+
+✅ How It Works
+1. When you commit code, pre-commit runs all hooks in order
+1. After all other hooks pass, the version bumping hook runs
+1. It reads the current version (e.g., 0.1.1)
+1. Increments the build number (e.g., 0.1.2)
+1. Updates all version references in the project
+1. Stages the changes automatically
+1. The commit proceeds with the updated version
+
+See [scripts/bump_build.py](../scripts/bump_build.py) - A Python script that:
+1. Uses the same regex pattern as your tbump.toml configuration
+1. Increments the build number by 1
+1. Updates all version references in:
+    1. VERSION file
+    1. pyproject.toml
+    1. src/app/__init__.py
+    1. tests/app/__init__.py
+1. Automatically stages the version changes
