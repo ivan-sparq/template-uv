@@ -59,6 +59,14 @@ def main() -> None:
         )
         pyproject.write_text(pyproject_text)
 
+        # update tbump.toml
+        tbump_toml = Path("tbump.toml")
+        tbump_toml_text = tbump_toml.read_text()
+        tbump_toml_text = tbump_toml_text.replace(
+            f'current = "{current_version}"', f'current = "{new_version}"'
+        )
+        tbump_toml.write_text(tbump_toml_text)
+
         # Update all __init__.py files
         for init_file in Path("src").rglob("__init__.py"):
             init_text = init_file.read_text()
