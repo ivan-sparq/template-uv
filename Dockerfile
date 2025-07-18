@@ -1,25 +1,34 @@
+#  Multi-stage Dockerfile for production and test
 #---------builder------------
-    FROM python:3.12-slim-bookworm AS builder
-    WORKDIR /app
+FROM python:3.13 AS base
+WORKDIR /app
+ENV PATH=/app/.venv/bin:$PATH
 
-    # install uv
-    COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
+# install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
-    # install dependencies (no lockfile)
-    COPY pyproject.toml /app/
-    RUN uv sync --no-dev --all-extras
+# Copy project files
+COPY pyproject.toml uv.lock README.md /app/
+COPY src/ /app/src/
+RUN uv sync --no-dev --frozen
+RUN uv pip install -e .
 
-    # install dependencies (with lockfile)
-    # COPY pyproject.toml uv.lock /app/
-    # RUN uv sync --no-dev --frozen
+#--------- production ------------
+FROM base as production
 
-    #---------runner------------
-    FROM python:3.12-slim-bookworm AS runner
-    WORKDIR /app
+COPY --from=base /app/ /app/
 
-    COPY --from=builder /app/.venv /app/.venv
-    ENV PATH=/app/.venv/bin:$PATH
+ENTRYPOINT []
 
-    COPY src/app /app/app
+#--------- tester ------------
+FROM base as test
+ENV PATH=/app/src/app:$PATH
 
-    ENTRYPOINT []
+COPY --from=base /app/ /app/
+# Copy tests directory
+COPY tests/ /app/tests/
+# Install all dependencies including dev dependencies
+RUN uv sync --group dev --frozen
+
+# Default command to run tests
+CMD ["uv", "run", "pytest", "tests/"]

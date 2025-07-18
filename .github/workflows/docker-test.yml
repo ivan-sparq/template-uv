@@ -1,0 +1,89 @@
+name: Docker Build and Test
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches: [main, develop]
+  workflow_run:
+    workflows: ["Bump Minor Version on PR Merge"]
+    types: [completed]
+
+jobs:
+  docker-test:
+    runs-on: ubuntu-latest
+
+    # Only run on workflow_run if the bump workflow succeeded
+    if: |
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' ||
+      github.event_name != 'workflow_run'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Read version
+        id: version
+        run: echo "version=$(cat VERSION)" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Note: GITHUB_TOKEN is automatically available for ghcr.io
+      # No explicit login needed when using GITHUB_TOKEN
+
+      - name: Debug GitHub context
+        run: |
+            echo "Repository: ${{ github.repository }}"
+            echo "Owner: ${{ github.repository_owner }}"
+            echo "Actor: ${{ github.actor }}"
+            echo "Ref: ${{ github.ref_name }}"
+            echo "VERSION: ${{ steps.version.outputs.version }}"
+
+      - name: Build production image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.test
+          target: production
+          push: false
+          tags: |
+            app:production-${{ steps.version.outputs.version }}
+            app:production-latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build test image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.test
+          target: test
+          push: false
+          tags: |
+            app:test-${{ steps.version.outputs.version }}
+            app:test-latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Run tests in container
+        run: |
+          docker run --rm \
+            -v $(pwd)/coverage_html:/app/coverage_html \
+            -v $(pwd)/coverage.xml:/app/coverage.xml \
+            app:test-${{ steps.version.outputs.version }} \
+            uv run pytest tests/  -v
+
+      - name: Push images to registry (after version bump)
+        if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile.test
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:${{ steps.version.outputs.version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
