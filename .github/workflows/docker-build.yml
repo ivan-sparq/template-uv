@@ -47,10 +47,12 @@ jobs:
           context: .
           file: ./Dockerfile
           target: production
-          push: false
+          push: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' }}
+          platforms: linux/amd64,linux/arm64
           tags: |
-            app:production-${{ steps.version.outputs.version }}
+            app:${{ steps.version.outputs.version }}
             app:production-latest
+            ghcr.io/${{ github.repository }}:${{ steps.version.outputs.version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -64,18 +66,5 @@ jobs:
           tags: |
             app:test-${{ steps.version.outputs.version }}
             app:test-latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Push images to registry (after version bump)
-        if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile.test
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: |
-            ghcr.io/${{ github.repository }}:${{ steps.version.outputs.version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
