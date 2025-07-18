@@ -88,9 +88,7 @@ jobs:
             # Commit with descriptive message
             PR_NUMBER=${{ github.event.pull_request.number }}
             PR_TITLE="${{ github.event.pull_request.title }}"
-            git commit -m "Bump minor version after PR #$PR_NUMBER merge
-
-            - Triggered by: $PR_TITLE"
+            git commit -m "Bump minor version after PR #$PR_NUMBER merge - Triggered by: $PR_TITLE"
 
             # Push to the target branch
             TARGET_BRANCH="${{ github.event.pull_request.base.ref }}"
