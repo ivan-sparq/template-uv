@@ -1,7 +1,7 @@
 # How to make a release
 
 1. create a new release branch `git checkout -b release/X.Y.Z`
-1. bump the package version `tbump X.Y.Z`
+1. bump the package version `uv run bump-my-version bump --new-version X.Y.Z`
 1. commit the changes `git commit -m "bump version to X.Y.Z"`
 1. push the changes `git push origin release/X.Y.Z`
 1. create a pull request to merge the changes into the main branch `gh pr create --base main`
@@ -20,8 +20,8 @@
 1. Stages the changes automatically
 1. The commit proceeds with the updated version
 
-See [scripts/bump_build.py](../scripts/bump_build.py) - A Python script that:
-1. Uses the same regex pattern as your tbump.toml configuration
+The automatic version bumping is now handled by `bump-my-version` which:
+1. Uses the configuration in `pyproject.toml`
 1. Increments the build number by 1
 1. Updates all version references in:
     1. VERSION file
