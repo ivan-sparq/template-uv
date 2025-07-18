@@ -1,0 +1,9 @@
+---
+alwaysApply: false
+---
+- Write functional tests using pytest; place them in tests/app/.
+- use conftest.py to define fixtures for the tests
+- Each python module should have a separate test file.
+- write unit tests for each function and class that does not call an external API
+- write separate unit test for each function and class that calls an external API and mock the API calls
+- write system tests for each function and class that calls an external API (no need to mock the external API)

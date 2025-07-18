@@ -1,6 +1,6 @@
 [project]
 name = "app"
-version = "0.1.0"
+version = "0.1.7"
 description = "Add your description here"
 readme = "README.md"
 authors = [{ name = "Authi", email = "auther@authi.com" }]
@@ -32,7 +32,7 @@ pythonpath = "src/app"
 # produce a code coverage report in xml, html and terminal
 # forces pytest to re-create the test database
 # NOTE: you can not run pycharm debugger with codecov. Comment out this line to debug
-addopts = '--cov=vrop --cov-report xml --cov-report html:coverage_html --cov-report term '
+addopts = '--cov=app --cov-report xml --cov-report html:coverage_html --cov-report term '
 markers = [
     "unit: single funciton, no api calls",
     "integration: test more than 1 function",

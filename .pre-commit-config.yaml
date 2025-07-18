@@ -28,6 +28,16 @@ repos:
         args: [--fix]
       # Run the formatter.
       - id: ruff-format
+
+  - repo: local
+    hooks:
+      - id: bump-build-version
+        name: Auto increment build number
+        description: Increments the build part of the version by 1 on every commit using tbump
+        entry: .venv/bin/python scripts/bump_build.py
+        language: system
+        always_run: true
+        pass_filenames: false
 #  - repo: https://github.com/pycqa/pydocstyle
 #    rev: 6.3.0
 #    hooks:

@@ -1,0 +1,15 @@
+---
+alwaysApply: false
+description: These rules apply when working with Django, using Django 5+ and django-ninja for APIs.
+---
+- Use Django 5+ features such as improved async support, simplified middleware, and enhanced ORM capabilities.
+- For APIs, use django-ninja to create fast, type-safe APIs with automatic OpenAPI documentation.
+- Structure projects following Django's conventions: apps in src/, settings in settings.py, urls in urls.py.
+- Always use type hints in models, views, and serializers (e.g., from typing import List).
+- Define models with Field types and use migrations (python manage.py makemigrations and migrate).
+- Use class-based views or function-based views with django-ninja's @api.get/post/etc. decorators.
+- Handle authentication with Django's built-in auth or integrate with django-ninja's auth.
+- Write tests using Django's TestCase and pytest-django if needed.
+- For dependency management: Add Django and django-ninja via 'uv add django' and 'uv add django-ninja', update pyproject.toml, and run 'uv sync'.
+- Use async views and queries where appropriate for performance in Django 5+.
+- Ensure error handling with custom exception handlers in django-ninja.

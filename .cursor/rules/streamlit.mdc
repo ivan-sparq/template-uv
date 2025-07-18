@@ -1,0 +1,11 @@
+---
+description: These rules apply when developing frontend components using Streamlit.
+alwaysApply: false
+---
+- Use Streamlit's imperative API for building UIs (e.g., st.title, st.button, st.dataframe).
+- Manage state with st.session_state to persist data across reruns.
+- Organize Streamlit apps in separate .py files under a 'streamlit/' directory or similar.
+- Always add type hints to functions and variables, e.g., def main() -> None:
+- Use caching with @st.cache_data or @st.cache_resource for performance-critical functions.
+- Handle errors gracefully, using st.error for user-facing messages.
+- Ensure compatibility with Python 3.11+ features where applicable.
