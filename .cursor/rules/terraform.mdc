@@ -1,0 +1,10 @@
+---
+description: These rules apply when working with Terraform using OpenTofu.
+alwaysApply: false
+globs: "*.tf"
+---
+
+- Use OpenTofu as the tool instead of Terraform for all infrastructure as code tasks.
+- Utilize OpenTofu workspaces to manage different environments (e.g., dev, staging, prod).
+- Store Terraform variable files (.tfvars) in the ./vars folder, organized by environment or purpose.
+- Place all custom modules in the modules directory, ensuring they are reusable and well-documented.
