@@ -41,21 +41,6 @@ jobs:
             echo "Ref: ${{ github.ref_name }}"
             echo "VERSION: ${{ steps.version.outputs.version }}"
 
-      - name: Build production image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile
-          target: production
-          push: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' }}
-          platforms: linux/amd64,linux/arm64
-          tags: |
-            app:${{ steps.version.outputs.version }}
-            app:production-latest
-            ghcr.io/${{ github.repository }}:${{ steps.version.outputs.version }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
       - name: Build test image
         uses: docker/build-push-action@v5
         with:
@@ -66,5 +51,20 @@ jobs:
           tags: |
             app:test-${{ steps.version.outputs.version }}
             app:test-latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build production image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          target: production
+          push: ${{ github.event_name == 'workflow_run' }}
+          platforms: linux/amd64,linux/arm64
+          tags: |
+            app:${{ steps.version.outputs.version }}
+            app:production-latest
+            ghcr.io/${{ github.repository }}:${{ steps.version.outputs.version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
