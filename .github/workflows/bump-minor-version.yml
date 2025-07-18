@@ -79,7 +79,7 @@ jobs:
             exit 1
           fi
 
-          # Parse version components using the same regex as tbump.toml
+          # Parse version components using the same regex as bump-my-version config
           if [[ $CURRENT_VERSION =~ ^([0-9]+)\.([0-9]+)\.(([a-z]+)?([0-9]+))$ ]]; then
             MAJOR="${BASH_REMATCH[1]}"
             MINOR="${BASH_REMATCH[2]}"
@@ -93,16 +93,7 @@ jobs:
             echo "New version: $NEW_VERSION"
 
             # Update VERSION file
-            echo "$NEW_VERSION" > VERSION
-
-            # Update pyproject.toml
-            sed -i "s/version = \"$CURRENT_VERSION\"/version = \"$NEW_VERSION\"/" pyproject.toml
-
-            # Update all __init__.py files
-            find src/ tests/ -name "__init__.py" -exec sed -i "s/__version__ = \"$CURRENT_VERSION\"/__version__ = \"$NEW_VERSION\"/" {} \;
-
-            # Update tbump.toml
-            sed -i "s/current = \"$CURRENT_VERSION\"/current = \"$NEW_VERSION\"/" tbump.toml
+            uv run bump-my-version bump --new-version $NEW_VERSION
 
             echo "Version bumped from $CURRENT_VERSION to $NEW_VERSION"
           else
@@ -118,8 +109,7 @@ jobs:
           git config --local user.name "GitHub Action"
 
           # Add all version-related files
-          git add VERSION pyproject.toml tbump.toml
-          git add src/ tests/
+          git add .
 
           # Check if there are changes to commit
           if git diff --staged --quiet; then

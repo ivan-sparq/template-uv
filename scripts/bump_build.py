@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Script to increment the build number using tbump logic."""
+"""Script to increment the build number using bump-my-version logic."""
 
 import re
 import subprocess
@@ -8,13 +8,13 @@ from pathlib import Path
 
 
 def main() -> None:
-    """Increment the build number using tbump logic."""
+    """Increment the build number using bump-my-version logic."""
     try:
         # Read current version from VERSION file
         version_file = Path("VERSION")
         current_version = version_file.read_text().strip()
 
-        # Use the same regex as tbump.toml
+        # Use the same regex as bump-my-version config in pyproject.toml
         regex = re.compile(
             r"""
           (?P<major>\d+)
@@ -57,15 +57,12 @@ def main() -> None:
         pyproject_text = pyproject_text.replace(
             f'version = "{current_version}"', f'version = "{new_version}"'
         )
-        pyproject.write_text(pyproject_text)
-
-        # update tbump.toml
-        tbump_toml = Path("tbump.toml")
-        tbump_toml_text = tbump_toml.read_text()
-        tbump_toml_text = tbump_toml_text.replace(
-            f'current = "{current_version}"', f'current = "{new_version}"'
+        # Update bump-my-version config
+        pyproject_text = pyproject_text.replace(
+            f'current_version = "{current_version}"',
+            f'current_version = "{new_version}"',
         )
-        tbump_toml.write_text(tbump_toml_text)
+        pyproject.write_text(pyproject_text)
 
         # Update all __init__.py files
         for init_file in Path("src").rglob("__init__.py"):
@@ -83,9 +80,7 @@ def main() -> None:
             init_file.write_text(init_text)
 
         # Add the modified files to git
-        subprocess.run(
-            ["git", "add", "VERSION", "pyproject.toml", "src/", "tests/"], check=True
-        )
+        subprocess.run(["git", "add", "."], check=True)
 
         print(f"Version bumped successfully to {new_version}")
 
