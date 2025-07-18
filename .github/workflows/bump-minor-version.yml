@@ -6,7 +6,6 @@ on:
     branches:
       - main
       - develop
-  workflow_dispatch: # Allow manual trigger
 
 jobs:
   bump-minor-version:
@@ -71,7 +70,8 @@ jobs:
         run: |
           uv run bump-my-version bump minor -v --allow-dirty
 
-      - name: Commit version bump
+
+      - name: Commit and push version bump
         if: steps.check-bump.outputs.skip_bump != 'true'
         run: |
           # Configure git
@@ -91,47 +91,12 @@ jobs:
             git commit -m "Bump minor version after PR #$PR_NUMBER merge
 
             - Triggered by: $PR_TITLE"
+
+            # Push to the target branch
+            TARGET_BRANCH="${{ github.event.pull_request.base.ref }}"
+            echo "Pushing to target branch: $TARGET_BRANCH"
+            git push origin HEAD:$TARGET_BRANCH
           fi
-
-      - name: Create or update version bump PR
-        if: steps.check-bump.outputs.skip_bump != 'true'
-        run: |
-          TARGET_BRANCH="${{ github.event.pull_request.base.ref }}"
-          VERSION_BUMP_BRANCH="version-bump/$(date +%s)"
-
-          # Create a new branch for the version bump
-          git checkout -b "$VERSION_BUMP_BRANCH"
-          git push origin "$VERSION_BUMP_BRANCH"
-
-          # Check for existing version bump PRs and close them
-          EXISTING_PR=$(gh pr list --head "version-bump/*" --base "$TARGET_BRANCH" --json number,title --jq '.[0].number // empty')
-          if [ ! -z "$EXISTING_PR" ]; then
-            echo "Closing existing version bump PR #$EXISTING_PR"
-            gh pr close "$EXISTING_PR" --delete-branch
-          fi
-
-          # Create new PR with auto-merge enabled
-          PR_NUMBER=${{ github.event.pull_request.number }}
-          PR_TITLE="${{ github.event.pull_request.title }}"
-
-          gh pr create \
-            --base "$TARGET_BRANCH" \
-            --head "$VERSION_BUMP_BRANCH" \
-            --title "🤖 Auto: Bump minor version after PR #$PR_NUMBER merge" \
-            --body "This PR automatically bumps the minor version after merging PR #$PR_NUMBER.
-
-          **Triggered by:** $PR_TITLE
-
-          **Changes:**
-          - Bumped minor version
-          - Updated version files
-
-          This PR will be automatically merged once approved."
-
-          # Enable auto-merge
-          gh pr merge --auto --merge
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Git tag and GitHub release
         if: steps.check-bump.outputs.skip_bump != 'true'
