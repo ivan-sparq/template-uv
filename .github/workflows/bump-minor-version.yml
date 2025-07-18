@@ -68,7 +68,7 @@ jobs:
       - name: Bump minor version
         if: steps.check-bump.outputs.skip_bump != 'true'
         run: |
-          uv run bump-my-version bump minor
+          uv run bump-my-version bump minor -v --allow-dirty
 
 
       - name: Commit and push version bump
