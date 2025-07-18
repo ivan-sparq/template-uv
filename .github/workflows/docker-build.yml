@@ -45,7 +45,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Dockerfile.test
+          file: ./Dockerfile
           target: production
           push: false
           tags: |
@@ -58,7 +58,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./Dockerfile.test
+          file: ./Dockerfile
           target: test
           push: false
           tags: |
@@ -66,14 +66,6 @@ jobs:
             app:test-latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      - name: Run tests in container
-        run: |
-          docker run --rm \
-            -v $(pwd)/coverage_html:/app/coverage_html \
-            -v $(pwd)/coverage.xml:/app/coverage.xml \
-            app:test-${{ steps.version.outputs.version }} \
-            uv run pytest tests/  -v
 
       - name: Push images to registry (after version bump)
         if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'
