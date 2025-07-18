@@ -1,6 +1,6 @@
 [project]
 name = "app"
-version = "0.4.13"
+version = "0.4.20"
 description = "Add your description here"
 readme = "README.md"
 authors = [{ name = "Authi", email = "auther@authi.com" }]
@@ -27,7 +27,7 @@ dev = [
 ]
 
 [tool.bumpversion]
-current_version = "0.4.13"
+current_version = "0.4.20"
 parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<release>[a-z]*)(?P<build>\\d+)"
 serialize = ["{major}.{minor}.{release}{build}", "{major}.{minor}.{build}"]
 search = "{current_version}"
@@ -50,6 +50,15 @@ post_commit_hooks = []
 
 [[tool.bumpversion.files]]
 filename = "VERSION"
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+
+[[tool.bumpversion.files]]
+filename = "src/app/__init__.py"
+
+[tool.bumpversion.parts]
+release = { optional_value = "" }
 
 
 [tool.pytest.ini_options]

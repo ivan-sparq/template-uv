@@ -28,7 +28,7 @@ wheels = [
 
 [[package]]
 name = "app"
-version = "0.4.12"
+version = "0.4.19"
 source = { editable = "." }
 
 [package.dev-dependencies]

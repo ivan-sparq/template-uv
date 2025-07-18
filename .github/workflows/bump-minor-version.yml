@@ -68,38 +68,8 @@ jobs:
       - name: Bump minor version
         if: steps.check-bump.outputs.skip_bump != 'true'
         run: |
-          # Read current version
-          CURRENT_VERSION=$(cat VERSION)
-          echo "Current version: $CURRENT_VERSION"
+          uv run bump-my-version bump minor
 
-          # Validate version format
-          if [[ ! $CURRENT_VERSION =~ ^[0-9]+\.[0-9]+\.[a-z]*[0-9]+$ ]]; then
-            echo "Error: Invalid version format: $CURRENT_VERSION"
-            echo "Expected format: MAJOR.MINOR.BUILD or MAJOR.MINOR.RELEASEBUILD"
-            exit 1
-          fi
-
-          # Parse version components using the same regex as bump-my-version config
-          if [[ $CURRENT_VERSION =~ ^([0-9]+)\.([0-9]+)\.(([a-z]+)?([0-9]+))$ ]]; then
-            MAJOR="${BASH_REMATCH[1]}"
-            MINOR="${BASH_REMATCH[2]}"
-            RELEASE="${BASH_REMATCH[4]}"
-            BUILD="${BASH_REMATCH[5]}"
-
-            # Increment minor version, reset build to 0
-            NEW_MINOR=$((MINOR + 1))
-            NEW_VERSION="${MAJOR}.${NEW_MINOR}.${RELEASE}0"
-
-            echo "New version: $NEW_VERSION"
-
-            # Update VERSION file
-            uv run bump-my-version bump --new-version $NEW_VERSION
-
-            echo "Version bumped from $CURRENT_VERSION to $NEW_VERSION"
-          else
-            echo "Error: Version format not recognized: $CURRENT_VERSION"
-            exit 1
-          fi
 
       - name: Commit and push version bump
         if: steps.check-bump.outputs.skip_bump != 'true'

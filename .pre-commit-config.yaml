@@ -33,8 +33,8 @@ repos:
     hooks:
       - id: bump-build-version
         name: Auto increment build number
-        description: Increments the build part of the version by 1 on every commit using tbump
-        entry: .venv/bin/python scripts/bump_build.py
+        description: Increments the build part of the version by 1 on every commit using bump-my-version
+        entry: bash -c 'uv run bump-my-version bump build --allow-dirty -v && git add .'
         language: system
         always_run: true
         pass_filenames: false
