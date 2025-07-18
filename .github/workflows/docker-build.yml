@@ -8,6 +8,7 @@ on:
   workflow_run:
     workflows: ["Bump Minor Version on PR Merge"]
     types: [completed]
+  workflow_dispatch: # Allow manual trigger
 
 env:
   REGISTRY: ghcr.io
@@ -109,3 +110,10 @@ jobs:
             ${{ steps.container.outputs.full_container_name }}:${{ steps.version.outputs.version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Output image information
+        if: github.event_name == 'workflow_run'
+        run: |
+          echo "🚀 Image built and pushed successfully!"
+          echo "📦 Image: ${{ steps.container.outputs.full_container_name }}"
+          echo "🏷️  Tags: ${{ steps.container.outputs.tags }}"
