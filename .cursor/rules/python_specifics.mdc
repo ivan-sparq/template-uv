@@ -1,0 +1,13 @@
+---
+alwaysApply: true
+description: Python 3.11+ specific guidelines
+---
+
+
+- Use match-case statements for complex conditionals (Python 3.10+).
+- Leverage tomllib for TOML parsing (Python 3.11+).
+- Prefer Pydantic for data models over TypedDict when validation is needed.
+- Use Pandera for defining schema for dataframes
+- use list, dict, set, tuple, for type hints instead of the List and Dict from typing
+- Avoid using 'Any' in type hints; be specific.
+- For dependency management: Use 'uv add <package>' to add dependencies

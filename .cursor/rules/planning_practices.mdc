@@ -1,0 +1,9 @@
+---
+alwaysApply: false
+---
+Before writing code, think step-by-step:
+    1. Understand the task completely.
+    2. Break it down into small, manageable parts.
+    3. Consider edge cases and potential issues.
+    4. Plan the structure: imports, functions, classes, tests.
+    5. Ensure compatibility with Python 3.11+ and uv.

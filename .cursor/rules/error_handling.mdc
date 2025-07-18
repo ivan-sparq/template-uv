@@ -1,0 +1,7 @@
+---
+alwaysApply: false
+---
+- Raise specific exceptions.
+- Use `logging.exception(e)` and `logging.error(e)` when dealing with exceptions.
+- Handle errors gracefully with try-except blocks.
+- Use exception groups with except* for handling multiple exceptions (Python 3.11+).
