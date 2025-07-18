@@ -1,0 +1,132 @@
+name: Bump Minor Version on PR Merge
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+      - develop
+
+jobs:
+  bump-minor-version:
+    # Only run if PR was merged (not just closed)
+    if: github.event.pull_request.merged == true
+
+    runs-on: ubuntu-latest
+
+    # Use concurrency to prevent duplicate runs
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch full history for git operations
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: latest
+
+      - name: Install dependencies
+        run: uv sync --extra dev
+
+      - name: Check if version bump is needed
+        id: check-bump
+        run: |
+          # Check if this PR already has a version bump commit
+          PR_NUMBER=${{ github.event.pull_request.number }}
+          if git log --oneline --grep="Bump minor version" | grep -q "PR #$PR_NUMBER"; then
+            echo "Version bump already exists for PR #$PR_NUMBER"
+            echo "skip_bump=true" >> $GITHUB_OUTPUT
+          else
+            echo "No version bump found for PR #$PR_NUMBER"
+            echo "skip_bump=false" >> $GITHUB_OUTPUT
+          fi
+
+          # Also check if we're on a branch that already has recent version bumps
+          # This prevents multiple bumps on the same branch
+          RECENT_BUMPS=$(git log --oneline --since="1 hour ago" --grep="Bump minor version" | wc -l)
+          if [ "$RECENT_BUMPS" -gt 0 ]; then
+            echo "Recent version bumps detected, skipping to prevent duplicates"
+            echo "skip_bump=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Bump minor version
+        if: steps.check-bump.outputs.skip_bump != 'true'
+        run: |
+          # Read current version
+          CURRENT_VERSION=$(cat VERSION)
+          echo "Current version: $CURRENT_VERSION"
+
+          # Validate version format
+          if [[ ! $CURRENT_VERSION =~ ^[0-9]+\.[0-9]+\.[a-z]*[0-9]+$ ]]; then
+            echo "Error: Invalid version format: $CURRENT_VERSION"
+            echo "Expected format: MAJOR.MINOR.BUILD or MAJOR.MINOR.RELEASEBUILD"
+            exit 1
+          fi
+
+          # Parse version components using the same regex as tbump.toml
+          if [[ $CURRENT_VERSION =~ ^([0-9]+)\.([0-9]+)\.(([a-z]+)?([0-9]+))$ ]]; then
+            MAJOR="${BASH_REMATCH[1]}"
+            MINOR="${BASH_REMATCH[2]}"
+            RELEASE="${BASH_REMATCH[4]}"
+            BUILD="${BASH_REMATCH[5]}"
+
+            # Increment minor version, reset build to 0
+            NEW_MINOR=$((MINOR + 1))
+            NEW_VERSION="${MAJOR}.${NEW_MINOR}.${RELEASE}0"
+
+            echo "New version: $NEW_VERSION"
+
+            # Update VERSION file
+            echo "$NEW_VERSION" > VERSION
+
+            # Update pyproject.toml
+            sed -i "s/version = \"$CURRENT_VERSION\"/version = \"$NEW_VERSION\"/" pyproject.toml
+
+            # Update all __init__.py files
+            find src/ tests/ -name "__init__.py" -exec sed -i "s/__version__ = \"$CURRENT_VERSION\"/__version__ = \"$NEW_VERSION\"/" {} \;
+
+            # Update tbump.toml
+            sed -i "s/current = \"$CURRENT_VERSION\"/current = \"$NEW_VERSION\"/" tbump.toml
+
+            echo "Version bumped from $CURRENT_VERSION to $NEW_VERSION"
+          else
+            echo "Error: Version format not recognized: $CURRENT_VERSION"
+            exit 1
+          fi
+
+      - name: Commit and push version bump
+        if: steps.check-bump.outputs.skip_bump != 'true'
+        run: |
+          # Configure git
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+          # Add all version-related files
+          git add VERSION pyproject.toml tbump.toml
+          git add src/ tests/
+
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            # Commit with descriptive message
+            PR_NUMBER=${{ github.event.pull_request.number }}
+            PR_TITLE="${{ github.event.pull_request.title }}"
+            git commit -m "Bump minor version after PR #$PR_NUMBER merge
+
+            - Triggered by: $PR_TITLE"
+
+            # Push to the same branch
+            git push origin ${{ github.ref }}
+          fi
