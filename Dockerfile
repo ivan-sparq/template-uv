@@ -14,14 +14,14 @@ RUN uv sync --no-dev --frozen
 RUN uv pip install -e .
 
 #--------- production ------------
-FROM base as production
+FROM base AS production
 
 COPY --from=base /app/ /app/
 
 ENTRYPOINT []
 
 #--------- tester ------------
-FROM base as test
+FROM base AS test
 ENV PATH=/app/src/app:$PATH
 
 COPY --from=base /app/ /app/

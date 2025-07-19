@@ -40,7 +40,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Log in to the Container registry
-        if: github.event_name == 'workflow_run'
+        if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -54,6 +54,8 @@ jobs:
             echo "Actor: ${{ github.actor }}"
             echo "Ref: ${{ github.ref_name }}"
             echo "VERSION: ${{ steps.version.outputs.version }}"
+            echo "Event name: ${{ github.event_name }}"
+            echo "Workflow run conclusion: ${{ github.event.workflow_run.conclusion }}"
 
       - name: Generate container name and tags
         id: container
@@ -64,22 +66,27 @@ jobs:
             # Store full container name
             FULL_CONTAINER_NAME="${{ env.REGISTRY }}/${REPO_LOWER}/${{ env.IMAGE_NAME }}"
             echo "full_container_name=${FULL_CONTAINER_NAME}" >> $GITHUB_OUTPUT
+            echo "Generated container name: ${FULL_CONTAINER_NAME}"
 
             # Generate tags based on the event
             if [[ "${{ github.event_name }}" == "pull_request" ]]; then
               echo "tags=${FULL_CONTAINER_NAME}:pr-${{ github.event.number }}" >> $GITHUB_OUTPUT
               echo "test_tag=pr-${{ github.event.number }}" >> $GITHUB_OUTPUT
+              echo "Generated tags: ${FULL_CONTAINER_NAME}:pr-${{ github.event.number }}"
             elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
               echo "tags=${FULL_CONTAINER_NAME}:main,${FULL_CONTAINER_NAME}:latest" >> $GITHUB_OUTPUT
               echo "test_tag=latest" >> $GITHUB_OUTPUT
+              echo "Generated tags: ${FULL_CONTAINER_NAME}:main,${FULL_CONTAINER_NAME}:latest"
             elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
               echo "tags=${FULL_CONTAINER_NAME}:develop" >> $GITHUB_OUTPUT
               echo "test_tag=develop" >> $GITHUB_OUTPUT
+              echo "Generated tags: ${FULL_CONTAINER_NAME}:develop"
             else
               # For other branches, use branch name
               BRANCH_NAME=${GITHUB_REF#refs/heads/}
               echo "tags=${FULL_CONTAINER_NAME}:${BRANCH_NAME}" >> $GITHUB_OUTPUT
               echo "test_tag=${BRANCH_NAME}" >> $GITHUB_OUTPUT
+              echo "Generated tags: ${FULL_CONTAINER_NAME}:${BRANCH_NAME}"
             fi
 
       - name: Build test image
@@ -90,8 +97,8 @@ jobs:
           target: test
           push: false
           tags: |
-            app:test-${{ steps.version.outputs.version }}
-            app:test-latest
+            ${{ steps.container.outputs.full_container_name }}:test-${{ steps.version.outputs.version }}
+            ${{ steps.container.outputs.full_container_name }}:test-latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -104,12 +111,17 @@ jobs:
           push: ${{ github.event_name == 'workflow_run' }}
           platforms: linux/amd64,linux/arm64
           tags: |
-            app:production
-            app:${{ steps.version.outputs.version }}
-            ${{ steps.container.outputs.tags }}
             ${{ steps.container.outputs.full_container_name }}:${{ steps.version.outputs.version }}
+            ${{ steps.container.outputs.tags }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Debug build tags
+        run: |
+          echo "Full container name: ${{ steps.container.outputs.full_container_name }}"
+          echo "Tags: ${{ steps.container.outputs.tags }}"
+          echo "Version: ${{ steps.version.outputs.version }}"
+          echo "Push enabled: ${{ github.event_name == 'workflow_run' }}"
 
       - name: Output image information
         if: github.event_name == 'workflow_run'
