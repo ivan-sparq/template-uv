@@ -22,8 +22,7 @@ def setup_logging(
     resolved_format = log_format
     if resolved_format is None:
         resolved_format = (
-            "%(asctime)s.%(msecs)03d %(levelname)s %(name)s "
-            "%(filename)s:%(lineno)d] %(message)s"
+            "%(asctime)s.%(msecs)03d %(levelname)s %(name)s %(filename)s:%(lineno)d] %(message)s"
         )
 
     logging.basicConfig(
