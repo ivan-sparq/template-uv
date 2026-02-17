@@ -11,7 +11,7 @@ This template provides three CI/CD workflows:
 2. **Docker Build and Publish** (`.github/workflows/docker-build.yml`)
    - Builds a test image and runs tests inside the container.
    - Builds production image and publishes to GHCR on non-PR events.
-3. **Release package from tag** (`.github/workflows/bump-minor-version.yml`)
+3. **Release package from tag** (`.github/workflows/release.yml`)
    - Triggered by `vX.Y.Z` tags.
    - Builds distributions and creates a GitHub Release.
    - Optionally publishes to PyPI if `PUBLISH_TO_PYPI=true`.
