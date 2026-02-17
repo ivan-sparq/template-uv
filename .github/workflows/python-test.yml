@@ -121,7 +121,7 @@ jobs:
 
       - name: Install wheel and smoke test CLI
         run: |
-          uv run python -m pip install --force-reinstall dist/*.whl
+          uv pip install --force-reinstall dist/*.whl
           uv run app --version
 
       - name: Upload distribution artifacts
