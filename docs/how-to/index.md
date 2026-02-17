@@ -4,3 +4,4 @@
 - [Release process](release-process.md)
 - [Documentation](documentation.md)
 - [Testing](testing.md)
+- [CI/CD workflow](ci-cd.md)

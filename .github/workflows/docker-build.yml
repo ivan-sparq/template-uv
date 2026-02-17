@@ -1,131 +1,80 @@
-name: Docker Build and Test
+name: Docker Build and Publish
 
 on:
   pull_request:
     types: [opened, synchronize, reopened]
   push:
     branches: [main, develop]
-  workflow_run:
-    workflows: ["Bump Minor Version on PR Merge"]
-    types: [completed]
-  workflow_dispatch: # Allow manual trigger
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
 
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: app
+permissions:
+  contents: read
+  packages: write
 
 jobs:
-  docker-test:
+  docker:
     runs-on: ubuntu-latest
-
-    # Only run on workflow_run if the bump workflow succeeded
-    if: |
-      github.event_name == 'workflow_run' &&
-      github.event.workflow_run.conclusion == 'success' ||
-      github.event_name != 'workflow_run'
-
-    permissions:
-      contents: read
-      packages: write
+    concurrency:
+      group: docker-${{ github.ref }}
+      cancel-in-progress: true
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Read version
-        id: version
-        run: echo "version=$(cat VERSION)" >> $GITHUB_OUTPUT
+      - name: Compute image name
+        id: image
+        run: |
+          REPOSITORY_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          echo "value=ghcr.io/${REPOSITORY_LOWER}/app" >> "$GITHUB_OUTPUT"
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Log in to the Container registry
-        if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success'
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ steps.image.outputs.value }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=ref,event=tag
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Log in to GitHub Container Registry
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Debug GitHub context
-        run: |
-            echo "Repository: ${{ github.repository }}"
-            echo "Owner: ${{ github.repository_owner }}"
-            echo "Actor: ${{ github.actor }}"
-            echo "Ref: ${{ github.ref_name }}"
-            echo "VERSION: ${{ steps.version.outputs.version }}"
-            echo "Event name: ${{ github.event_name }}"
-            echo "Workflow run conclusion: ${{ github.event.workflow_run.conclusion }}"
-
-      - name: Generate container name and tags
-        id: container
-        run: |
-            # Convert repository name to lowercase for Docker compatibility
-            REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-
-            # Store full container name
-            FULL_CONTAINER_NAME="${{ env.REGISTRY }}/${REPO_LOWER}/${{ env.IMAGE_NAME }}"
-            echo "full_container_name=${FULL_CONTAINER_NAME}" >> $GITHUB_OUTPUT
-            echo "Generated container name: ${FULL_CONTAINER_NAME}"
-
-            # Generate tags based on the event
-            if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-              echo "tags=${FULL_CONTAINER_NAME}:pr-${{ github.event.number }}" >> $GITHUB_OUTPUT
-              echo "test_tag=pr-${{ github.event.number }}" >> $GITHUB_OUTPUT
-              echo "Generated tags: ${FULL_CONTAINER_NAME}:pr-${{ github.event.number }}"
-            elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-              echo "tags=${FULL_CONTAINER_NAME}:main,${FULL_CONTAINER_NAME}:latest" >> $GITHUB_OUTPUT
-              echo "test_tag=latest" >> $GITHUB_OUTPUT
-              echo "Generated tags: ${FULL_CONTAINER_NAME}:main,${FULL_CONTAINER_NAME}:latest"
-            elif [[ "${{ github.ref }}" == "refs/heads/develop" ]]; then
-              echo "tags=${FULL_CONTAINER_NAME}:develop" >> $GITHUB_OUTPUT
-              echo "test_tag=develop" >> $GITHUB_OUTPUT
-              echo "Generated tags: ${FULL_CONTAINER_NAME}:develop"
-            else
-              # For other branches, use branch name
-              BRANCH_NAME=${GITHUB_REF#refs/heads/}
-              echo "tags=${FULL_CONTAINER_NAME}:${BRANCH_NAME}" >> $GITHUB_OUTPUT
-              echo "test_tag=${BRANCH_NAME}" >> $GITHUB_OUTPUT
-              echo "Generated tags: ${FULL_CONTAINER_NAME}:${BRANCH_NAME}"
-            fi
-
       - name: Build test image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
           target: test
-          push: false
-          tags: |
-            ${{ steps.container.outputs.full_container_name }}:test-${{ steps.version.outputs.version }}
-            ${{ steps.container.outputs.full_container_name }}:test-latest
+          load: true
+          tags: local/app:test
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build production image
-        uses: docker/build-push-action@v5
+      - name: Run tests in container
+        run: docker run --rm local/app:test
+
+      - name: Build and publish production image
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
           target: production
-          push: ${{ github.event_name == 'workflow_run' }}
+          push: ${{ github.event_name != 'pull_request' }}
           platforms: linux/amd64,linux/arm64
-          tags: |
-            ${{ steps.container.outputs.full_container_name }}:${{ steps.version.outputs.version }}
-            ${{ steps.container.outputs.tags }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      - name: Debug build tags
-        run: |
-          echo "Full container name: ${{ steps.container.outputs.full_container_name }}"
-          echo "Tags: ${{ steps.container.outputs.tags }}"
-          echo "Version: ${{ steps.version.outputs.version }}"
-          echo "Push enabled: ${{ github.event_name == 'workflow_run' }}"
-
-      - name: Output image information
-        if: github.event_name == 'workflow_run'
-        run: |
-          echo "🚀 Image built and pushed successfully!"
-          echo "📦 Image: ${{ steps.container.outputs.full_container_name }}"
-          echo "🏷️  Tags: ${{ steps.container.outputs.tags }}"

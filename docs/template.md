@@ -1,10 +1,13 @@
 ## Tools
 
 - [uv](https://docs.astral.sh/uv/)
-- [hatch](https://hatch.pypa.io/latest/)
+- [hatchling](https://hatch.pypa.io/latest/)
 - [bump-my-version](https://github.com/callowayproject/bump-my-version)
 - [ruff](https://github.com/astral-sh/ruff)
+- [mypy](https://mypy-lang.org/)
+- [pytest](https://docs.pytest.org/)
 - [pre-commit](https://pre-commit.com/)
+- [GitHub Actions](https://github.com/features/actions)
 
 ---
 

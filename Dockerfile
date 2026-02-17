@@ -1,34 +1,28 @@
-#  Multi-stage Dockerfile for production and test
-#---------builder------------
-FROM python:3.13 AS base
+# Multi-stage Dockerfile for production and tests.
+FROM python:3.13-slim AS base
 WORKDIR /app
-ENV PATH=/app/.venv/bin:$PATH
+ENV PATH="/app/.venv/bin:$PATH" \
+    PYTHONUNBUFFERED=1
 
-# install uv
+# Install uv binary.
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
-# Copy project files
-COPY pyproject.toml uv.lock README.md /app/
+# Copy project files.
+COPY pyproject.toml uv.lock README.md VERSION /app/
 COPY src/ /app/src/
-RUN uv sync --no-dev --frozen
-RUN uv pip install -e .
+RUN uv sync --no-dev --frozen && uv pip install --no-deps .
 
-#--------- production ------------
+# Production image.
 FROM base AS production
 
 COPY --from=base /app/ /app/
+ENTRYPOINT ["app"]
+CMD ["hello"]
 
-ENTRYPOINT []
-
-#--------- tester ------------
+# Test image.
 FROM base AS test
-ENV PATH=/app/src/app:$PATH
 
-COPY --from=base /app/ /app/
-# Copy tests directory
 COPY tests/ /app/tests/
-# Install all dependencies including dev dependencies
 RUN uv sync --group dev --frozen
 
-# Default command to run tests
 CMD ["uv", "run", "pytest", "tests/"]
