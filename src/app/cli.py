@@ -40,8 +40,7 @@ class AppCli:
         if configured_level is None:
             supported_levels = ", ".join(sorted(_LOG_LEVELS))
             raise ValueError(
-                f"Unsupported log level '{log_level}'. "
-                f"Supported values: {supported_levels}."
+                f"Unsupported log level '{log_level}'. Supported values: {supported_levels}."
             )
 
         setup_logging(level=configured_level)
@@ -56,6 +55,7 @@ class AppCli:
             Package version.
         """
         return __version__
+
 
 def run(argv: list[str] | None = None) -> int:
     """Execute the CLI command and return an exit code.
