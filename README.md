@@ -33,7 +33,7 @@ CLI utility.
    - package folder `src/app/` and `tests/app/`
    - CLI script name under `[project.scripts]`
 5. Update `.python-version` and `requires-python` in `pyproject.toml`.
-6. Install dependencies: `uv sync --group dev`.
+6. Install dependencies: `uv sync --group dev`. For Jupyter support, also run `uv sync --group jupyter` (see [Jupyter how-to](docs/how-to/jupyter.md)).
 7. Install hooks: `uv run pre-commit install`.
 8. Update `.github/CODEOWNERS`.
 
@@ -54,6 +54,10 @@ uv run pytest
 uv run app hello
 uv run app version
 uv run app --version  # compatibility alias
+
+# Jupyter (install first: uv sync --group jupyter)
+uv run jupyter lab
+# Use notebooks in notebooks/; see docs/how-to/jupyter.md to add the uv venv as kernel.
 
 # Build package artifacts
 uv build
