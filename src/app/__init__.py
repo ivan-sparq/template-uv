@@ -1,8 +1,5 @@
-import logging
-
-from ._logging import setup_logging
+"""Top-level package metadata for the application template."""
 
 __version__ = "0.6.0"
 
-setup_logging()
-logging.info(f"Initializing app v{__version__}")
+__all__ = ["__version__"]

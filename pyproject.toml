@@ -1,19 +1,41 @@
 [project]
 name = "app"
 version = "0.6.0"
-description = "Add your description here"
+description = "Template for Python packages and CLI utilities."
 readme = "README.md"
 authors = [{ name = "Authi", email = "auther@authi.com" }]
 requires-python = ">=3.10"
-dependencies = []
+license = { text = "MIT" }
+dependencies = [
+    "fire>=0.7.1",
+]
+keywords = ["python", "template", "cli", "packaging"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
 
+[project.scripts]
+app = "app.cli:main"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.build.targets.wheel]
+packages = ["src/app"]
+
 [dependency-groups]
 dev = [
+    "build>=1.2.2",
+    "bump-my-version>=1.2.0",
     "ipykernel>=6.29.5",
     "mkdocs>=1.6.1",
     "mkdocs-material>=9.6.3",
@@ -23,19 +45,18 @@ dev = [
     "pytest>=8.3.4",
     "pytest-cov>=6.0.0",
     "ruff>=0.9.5",
-    "bump-my-version>=1.2.0",
 ]
 
 [tool.bumpversion]
 current_version = "0.6.0"
-parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<release>[a-z]*)(?P<build>\\d+)"
-serialize = ["{major}.{minor}.{release}{build}", "{major}.{minor}.{build}"]
+parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
+serialize = ["{major}.{minor}.{patch}"]
 search = "{current_version}"
 replace = "{new_version}"
 regex = false
 ignore_missing_version = false
 ignore_missing_files = false
-tag = false
+tag = true
 sign_tags = false
 tag_name = "v{new_version}"
 tag_message = "Bump version: {current_version} → {new_version}"
@@ -57,22 +78,47 @@ filename = "pyproject.toml"
 [[tool.bumpversion.files]]
 filename = "src/app/__init__.py"
 
-[tool.bumpversion.parts]
-release = { optional_value = "" }
-
-
 [tool.pytest.ini_options]
-pythonpath = "src/app"
-# produce a code coverage report in xml, html and terminal
-# forces pytest to re-create the test database
-# NOTE: you can not run pycharm debugger with codecov. Comment out this line to debug
-addopts = '--cov=app --cov-report xml --cov-report html:coverage_html --cov-report term '
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "--cov=app --cov-report=xml --cov-report=html:coverage_html --cov-report=term-missing -ra --strict-markers"
 markers = [
-    "unit: single funciton, no api calls",
-    "integration: test more than 1 function",
+    "unit: single function, no API calls",
+    "integration: test more than one function",
     "system: not implemented",
-    "slow: slow running test that for some reason hang when running in parallel",
+    "slow: slow-running test that can hang in parallel",
 ]
-log_cli = true
-log_cli_level = "DEBUG"
-#console_output_style = "classic"
+log_cli = false
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "C4", "SIM"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.10"
+files = ["src"]
+warn_unused_configs = true
+check_untyped_defs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+no_implicit_optional = true
+warn_return_any = true
+warn_unused_ignores = true
+
+[[tool.mypy.overrides]]
+module = ["fire"]
+ignore_missing_imports = true
+
+[tool.coverage.run]
+source = ["app"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true

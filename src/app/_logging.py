@@ -1,49 +1,45 @@
 import logging
 import sys
+from typing import TextIO
 
 
 def setup_logging(
     level: int = logging.INFO,
-    stream: logging.StreamHandler | None = None,
+    stream: TextIO | None = None,
     log_format: str | None = None,
     suppress_third_party_libraries: list[str] | None = None,
 ) -> None:
-    """
-    Set up logging with Google's default format.
+    """Configure root logging and suppress noisy third-party loggers.
 
     Args:
-        level: The logging level to use (default: INFO)
-        stream: The stream to log to (default: sys.stderr)
-        log_format: Optional custom log format string
+        level: The logging level to use.
+        stream: The text stream used by logging. Defaults to stderr.
+        log_format: Optional custom log format string.
+        suppress_third_party_libraries: Additional library logger names to silence.
     """
-    if stream is None:
-        stream = logging.StreamHandler(sys.stderr)
+    resolved_stream = stream if stream is not None else sys.stderr
 
-    if log_format is None:
-        # Google's default logging format
-        log_format = "%(asctime)s.%(msecs)03d %(levelname)s %(name)s %(filename)s:%(lineno)d] %(message)s"
+    resolved_format = log_format
+    if resolved_format is None:
+        resolved_format = (
+            "%(asctime)s.%(msecs)03d %(levelname)s %(name)s %(filename)s:%(lineno)d] %(message)s"
+        )
 
-    formatter = logging.Formatter(
-        fmt=log_format,
+    logging.basicConfig(
+        level=level,
+        format=resolved_format,
         datefmt="%m%d %H:%M:%S",
+        stream=resolved_stream,
+        force=True,
     )
-    stream.setFormatter(formatter)
 
-    root_logger = logging.getLogger()
-    root_logger.setLevel(level)
-    root_logger.addHandler(stream)
-
-    # Deal with None values
-    suppress_third_party_libraries = suppress_third_party_libraries or []
-
-    # Set up logging for third-party libraries
-    # silence third-party libraries
+    resolved_libraries = suppress_third_party_libraries or []
     for library in [
         "urllib3",
         "requests",
         "py4j",
         "httpx",
         "matplotlib",
-        *suppress_third_party_libraries,
+        *resolved_libraries,
     ]:
         logging.getLogger(library).setLevel(logging.ERROR)

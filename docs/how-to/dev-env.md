@@ -1,24 +1,23 @@
-# How to setup your development environment
+# How to set up your development environment
 
-### Assumptions:
+## Assumptions
 
-- Assuming you have already have cloned this repository locally
-- Assumping you are using VSCode to run the code locally
+- You already cloned this repository.
+- You are using VS Code (optional, but recommended).
 
-### Initial setup
+## Initial setup
 
-1. Install uv `brew install uv` ([How to install brew](https://brew.sh/))
-1. `uv sync --extra dev` to install the dependencies
-1. `uv run pre-commit install` to install the pre-commit hooks
+1. Install uv (see <https://docs.astral.sh/uv/getting-started/installation/>).
+2. Install dependencies: `uv sync --group dev`.
+3. Install git hooks: `uv run pre-commit install`.
 
-### Adding new Python dependencies
+## Add dependencies
 
-1. `uv add <dependency>` to add a new Python dependency
-1. `uv sync --extra dev` to install the new dependency (e.a. you need to manually run this if someone else has added a dependency)
+1. Add a runtime dependency: `uv add <dependency>`.
+2. Add a dev dependency: `uv add --group dev <dependency>`.
+3. Sync after pulling changes from other contributors: `uv sync --group dev`.
 
-### IDE setup
+## IDE setup
 
-1. Install the recommended extension from `.vscode/extensions.json`.
-   - Go to the extensions tab in VSCode
-   - From the filter icon (next to the search bar) select `Recommended`
-   - Click on the little cloud icon that says "Install Workspace Recommended Extensions" when you hover over it
+1. Install recommended extensions from `.vscode/extensions.json`.
+2. Ensure Ruff is selected as the Python formatter.

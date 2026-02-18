@@ -1,7 +1,13 @@
 site_name: App Docs
 nav:
   - Home: index.md
-  - How-to: how-to/index.md
+  - How-to:
+      - Overview: how-to/index.md
+      - Development environment: how-to/dev-env.md
+      - Testing: how-to/testing.md
+      - CI/CD workflow: how-to/ci-cd.md
+      - Release process: how-to/release-process.md
+      - Documentation: how-to/documentation.md
 plugins:
   - search
   - mkdocstrings:
@@ -10,7 +16,7 @@ plugins:
           paths: ["src/app"]
 theme:
   name: material
-  feature:
+  features:
     tabs: true
   palette:
     # Note: Using the system theme works with the insiders version
