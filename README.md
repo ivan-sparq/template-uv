@@ -8,6 +8,7 @@ CLI utility.
 - [uv](https://docs.astral.sh/uv/) for dependency management and fast virtualenvs
 - [hatchling](https://hatch.pypa.io/latest/) for package builds
 - [bump-my-version](https://github.com/callowayproject/bump-my-version) for manual semver bumps
+- [fire](https://github.com/google/python-fire) for CLI command generation
 - [ruff](https://github.com/astral-sh/ruff) for linting and formatting
 - [mypy](https://mypy-lang.org/) for type checking
 - [pytest](https://docs.pytest.org/) and pytest-cov for tests and coverage
@@ -51,7 +52,8 @@ uv run pytest
 
 # Run CLI
 uv run app hello
-uv run app --version
+uv run app version
+uv run app --version  # compatibility alias
 
 # Build package artifacts
 uv build

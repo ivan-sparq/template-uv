@@ -16,17 +16,23 @@ def test_run_hello_default(capsys: pytest.CaptureFixture[str]) -> None:
 
 def test_run_hello_name(capsys: pytest.CaptureFixture[str]) -> None:
     """Run the hello command with a custom name."""
-    exit_code = run(["--log-level", "debug", "hello", "template"])
+    exit_code = run(["hello", "template", "--log_level=debug"])
     captured = capsys.readouterr()
     assert exit_code == 0
     assert captured.out.strip() == "Hello, template!"
 
 
 def test_run_version(capsys: pytest.CaptureFixture[str]) -> None:
-    """Verify the version flag renders package metadata."""
-    with pytest.raises(SystemExit) as exc_info:
-        run(["--version"])
-
+    """Verify the compatibility version flag renders package metadata."""
+    exit_code = run(["--version"])
     captured = capsys.readouterr()
-    assert exc_info.value.code == 0
+    assert exit_code == 0
+    assert __version__ in captured.out
+
+
+def test_run_version_command(capsys: pytest.CaptureFixture[str]) -> None:
+    """Verify the Fire version command renders package metadata."""
+    exit_code = run(["version"])
+    captured = capsys.readouterr()
+    assert exit_code == 0
     assert __version__ in captured.out

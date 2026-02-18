@@ -3,6 +3,7 @@
 - [uv](https://docs.astral.sh/uv/)
 - [hatchling](https://hatch.pypa.io/latest/)
 - [bump-my-version](https://github.com/callowayproject/bump-my-version)
+- [fire](https://github.com/google/python-fire)
 - [ruff](https://github.com/astral-sh/ruff)
 - [mypy](https://mypy-lang.org/)
 - [pytest](https://docs.pytest.org/)

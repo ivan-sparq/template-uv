@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
-import argparse
 import logging
+import sys
+
+import fire
 
 from app import __version__
 from app._logging import setup_logging
@@ -17,38 +19,43 @@ _LOG_LEVELS: dict[str, int] = {
 }
 
 
-def build_parser() -> argparse.ArgumentParser:
-    """Build the CLI argument parser.
+class AppCli:
+    """Fire-powered command collection for the template CLI."""
 
-    Returns:
-        Configured argument parser for the CLI.
-    """
-    parser = argparse.ArgumentParser(
-        prog="app",
-        description="Template CLI for Python packages.",
-    )
-    parser.add_argument(
-        "--version",
-        action="version",
-        version=f"%(prog)s {__version__}",
-    )
-    parser.add_argument(
-        "--log-level",
-        choices=sorted(_LOG_LEVELS.keys()),
-        default="info",
-        help="Log level for runtime diagnostics.",
-    )
+    def hello(self, name: str = "world", log_level: str = "info") -> str:
+        """Return a greeting message.
 
-    subparsers = parser.add_subparsers(dest="command", required=True)
-    hello_parser = subparsers.add_parser("hello", help="Print a greeting.")
-    hello_parser.add_argument(
-        "name",
-        nargs="?",
-        default="world",
-        help="Name used in the greeting output.",
-    )
-    return parser
+        Args:
+            name: Name used in the greeting output.
+            log_level: Runtime log level.
 
+        Returns:
+            Greeting text.
+
+        Raises:
+            ValueError: If the provided log level is unsupported.
+        """
+        normalized_log_level = log_level.lower()
+        configured_level = _LOG_LEVELS.get(normalized_log_level)
+        if configured_level is None:
+            supported_levels = ", ".join(sorted(_LOG_LEVELS))
+            raise ValueError(
+                f"Unsupported log level '{log_level}'. "
+                f"Supported values: {supported_levels}."
+            )
+
+        setup_logging(level=configured_level)
+        logger = logging.getLogger(__name__)
+        logger.debug("Executing hello command for %s", name)
+        return f"Hello, {name}!"
+
+    def version(self) -> str:
+        """Return the package version string.
+
+        Returns:
+            Package version.
+        """
+        return __version__
 
 def run(argv: list[str] | None = None) -> int:
     """Execute the CLI command and return an exit code.
@@ -59,20 +66,14 @@ def run(argv: list[str] | None = None) -> int:
     Returns:
         Process exit code.
     """
-    parser = build_parser()
-    args = parser.parse_args(argv)
+    resolved_argv = list(argv) if argv is not None else sys.argv[1:]
 
-    setup_logging(level=_LOG_LEVELS[args.log_level])
-    logger = logging.getLogger(__name__)
+    if resolved_argv in (["--version"], ["-V"]):
+        print(__version__)
+        return 0
 
-    match args.command:
-        case "hello":
-            logger.debug("Executing hello command for %s", args.name)
-            print(f"Hello, {args.name}!")
-            return 0
-        case _:
-            parser.error(f"Unsupported command: {args.command}")
-            return 2
+    fire.Fire(component=AppCli(), command=resolved_argv, name="app")
+    return 0
 
 
 def main() -> None:
