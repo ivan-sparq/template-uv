@@ -1,5 +1,5 @@
 # Multi-stage Dockerfile for production and tests.
-FROM python:3.13-slim AS base
+FROM python:3.14-slim AS base
 WORKDIR /app
 ENV PATH="/app/.venv/bin:$PATH" \
     PYTHONUNBUFFERED=1
