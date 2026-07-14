@@ -5,8 +5,8 @@
 This template provides three CI/CD workflows:
 
 1. **Python CI** (`.github/workflows/python-test.yml`)
-   - Quality checks on Python 3.13 (ruff, mypy, pytest with coverage).
-   - Compatibility tests on Python 3.10-3.12.
+   - Quality checks on Python 3.14 (ruff, mypy, pytest with coverage).
+   - Compatibility tests on Python 3.11-3.13.
    - Package build and CLI smoke test (`uv build`, wheel install, `app --version`).
 2. **Docker Build and Publish** (`.github/workflows/docker-build.yml`)
    - Builds a test image and runs tests inside the container.

@@ -18,7 +18,7 @@ CLI utility.
 
 ## Why this template is CI/CD-friendly
 
-- CI runs quality checks on Python 3.13 and compatibility tests on 3.10-3.12.
+- CI runs quality checks on Python 3.14 and compatibility tests on 3.11-3.13.
 - CI verifies package build artifacts (`sdist` and wheel) and smoke-tests the CLI.
 - Release automation is tag-based (`vX.Y.Z`) which is the common Python packaging workflow.
 - Docker workflow validates tests in container builds and publishes images on non-PR events.
